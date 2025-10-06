@@ -165,21 +165,10 @@ function App() {
 
   return (
       <Router>
-        <Route path="/admin">
-          <AdminSimplePage />
-        </Route>
-
-        <Route path="/admin/posts">
-          <PostsPage />
-        </Route>
-        
-        <Route path="/admin/articles">
-          <ArticlesPage />
-        </Route>
-        
-        <Route path="/admin/appearance">
-          <AppearancePage />
-        </Route>
+        <Route path="/admin/posts" component={PostsPage} />
+        <Route path="/admin/articles" component={ArticlesPage} />
+        <Route path="/admin/appearance" component={AppearancePage} />
+        <Route path="/admin" component={AdminSimplePage} />
 
         <Route path="*">
           <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50" dir="rtl">
