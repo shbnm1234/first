@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Router, Route } from 'wouter';
+import { Router, Route, useLocation } from 'wouter';
 import HomePage from './pages/home-simple';
 import CoursesPage from './pages/courses-simple';
 import ProjectsPage from './pages/projects-simple';
@@ -165,14 +165,16 @@ function App() {
 
   return (
       <Router>
-        <Route path="/admin*">
-          {() => {
-            const [location] = useLocation();
-            if (location === '/admin/posts') return <PostsPage />;
-            if (location === '/admin/articles') return <ArticlesPage />;
-            if (location === '/admin/appearance') return <AppearancePage />;
-            return <AdminSimplePage />;
-          }}
+        <Route path="/admin/posts">
+          <PostsPage />
+        </Route>
+        
+        <Route path="/admin/articles">
+          <ArticlesPage />
+        </Route>
+        
+        <Route path="/admin/appearance">
+          <AppearancePage />
         </Route>
 
         <Route path="*">
