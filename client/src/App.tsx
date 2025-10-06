@@ -165,6 +165,10 @@ function App() {
 
   return (
       <Router>
+        <Route path="/admin">
+          <AdminSimplePage />
+        </Route>
+
         <Route path="/admin/posts">
           <PostsPage />
         </Route>
