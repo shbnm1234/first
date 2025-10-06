@@ -1,0 +1,33 @@
+export * from './card';
+export * from './button';
+export * from './badge';
+export * from './separator';
+export * from './label';
+export * from './skeleton';
+export * from './input';
+export * from './avatar';
+export * from './carousel';
+export * from './select';
+export * from './dropdown-menu';
+export * from './table';
+export * from './dialog';
+export * from './tabs';
+export * from './color-picker';
+export * from './switch';
+export * from './card';
+export * from './button';
+export * from './badge';
+export * from './separator';
+export * from './label';
+export * from './skeleton';
+export * from './input';
+export * from './avatar';
+export * from './carousel';
+export * from './select';
+export * from './dropdown-menu';
+export * from './table';
+export * from './dialog';
+
+// Provide default exports for common named imports
+import * as ui from './card';
+export default ui;

@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+--background: 0 0% 98%; /* #FAFAFA - پس‌زمینه کرم روشن */
+--foreground: 210 40% 15%; /* #1F2937 - متن اصلی تیره */
+--muted: 210 15% 95%; /* #F3F4F6 - پس‌زمینه کم‌رنگ */
+--muted-foreground: 210 20% 45%; /* #6B7280 - متن کم‌رنگ */
+--popover: 0 0% 100%;
+--popover-foreground: 210 40% 15%;
+--card: 0 0% 100%; /* #FFFFFF - پس‌زمینه کارت‌ها */
+--card-foreground: 210 40% 15%;
+--border: 210 20% 88%; /* #E5E7EB - حاشیه ملایم */
+--input: 210 20% 88%;
+--primary: 118 54% 40%; /* سبز اصلی پیستاط */
+--primary-foreground: 0 0% 100%;
+--secondary: 142 40% 95%; /* #ECFDF5 - سبز بسیار روشن */
+--secondary-foreground: 142 76% 25%;
+--accent: 118 54% 40%;
+--accent-foreground: 0 0% 100%;
+--destructive: 0 84% 60%;
+--destructive-foreground: 60 9% 98%;
+--ring: 118 54% 40%;
+--radius: 0.75rem;
+
+/* Custom colors from reference design */
+--green-light-bg: 118 45% 90%; /* خلفیه سبز روشن برای slider */
+--purple-light: 270 60% 95%; /* بنفش روشن */
+--purple-primary: 270 70% 60%; /* بنفش اصلی */
+--orange-light: 25 100% 92%; /* نارنجی روشن */
+--orange-primary: 25 85% 65%; /* نارنجی اصلی */
+--green-accent-light: 140 50% 92%; /* سبز تکمیلی روشن */
+--green-accent: 140 60% 50%; /* سبز تکمیلی */
+  }
+  .dark {
+      --background: 240 10% 3.9%;
+--foreground: 0 0% 98%;
+--muted: 240 3.7% 15.9%;
+--muted-foreground: 240 5% 64.9%;
+--popover: 240 10% 3.9%;
+--popover-foreground: 0 0% 98%;
+--card: 240 10% 3.9%;
+--card-foreground: 0 0% 98%;
+--border: 240 3.7% 15.9%;
+--input: 240 3.7% 15.9%;
+--primary: 118 54% 40%; /* سبز تیره لوگو پیستاط */
+--primary-foreground: 0 0% 100%;
+--secondary: 118 20% 15%; /* سبز تیره برای حالت شب */
+--secondary-foreground: 118 30% 85%;
+--accent: 118 54% 40%;
+--accent-foreground: 0 0% 100%;
+--destructive: 0 62.8% 30.6%;
+--destructive-foreground: 0 0% 98%;
+--ring: 240 4.9% 83.9%;
+--radius: 0.5rem;
+  }
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    direction: rtl;
+  }
+}
+
+@layer utilities {
+  /* راست‌چین کردن راحت‌تر اجزای مختلف */
+  .rtl {
+    direction: rtl;
+    text-align: right;
+  }
+  
+  .ltr {
+    direction: ltr;
+    text-align: left;
+  }
+  
+  /* تنظیمات برای چینش عناصر در محیط راست‌چین */
+  .margin-end {
+    margin-left: 0;
+    margin-right: auto;
+  }
+  
+  .margin-start {
+    margin-left: auto;
+    margin-right: 0;
+  }
+
+  /* مخفی کردن اسکرول بار */
+  .scrollbar-hide {
+    /* Firefox */
+    scrollbar-width: none;
+    /* Safari and Chrome */
+    -ms-overflow-style: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
