@@ -61,6 +61,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       active: location.startsWith("/admin/posts")
     },
     {
+      title: "مقالات",
+      icon: BookOpen,
+      href: "/admin/articles",
+      active: location.startsWith("/admin/articles")
+    },
+    {
       title: "رسانه",
       icon: Image,
       href: "/admin/media",
