@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
 import { Router, Route } from 'wouter';
 import HomePage from './pages/home-simple';
 import CoursesPage from './pages/courses-simple';
@@ -29,20 +30,6 @@ import PostsPage from "@/pages/admin/posts";
 import ArticlesPage from "@/pages/admin/articles";
 import AppearancePage from "@/pages/admin/appearance";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      queryFn: async ({ queryKey }) => {
-        const response = await fetch(queryKey[0] as string);
-        if (!response.ok) {
-          throw new Error(`${response.status}: ${response.statusText}`);
-        }
-        return response.json();
-      },
-    },
-  },
-});
-
 interface NavButtonProps {
   id: string;
   icon: string;
@@ -56,6 +43,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [selectedWebinarId, setSelectedWebinarId] = useState<number | null>(null);
   const [selectedMagazineId, setSelectedMagazineId] = useState<number | null>(null);
+  const [selectedVideoId, setSelectedVideoId] = useState<number | null>(null);
   const [showCategoriesMenu, setShowCategoriesMenu] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
 
@@ -69,12 +57,16 @@ function App() {
         setActiveTab(event.data.tab);
         setSelectedWebinarId(null);
         setSelectedMagazineId(null);
+        setSelectedVideoId(null);
       } else if (event.data.type === 'OPEN_WEBINAR') {
         setSelectedWebinarId(event.data.webinarId);
         setActiveTab('webinar');
       } else if (event.data.type === 'OPEN_MAGAZINE') {
         setSelectedMagazineId(event.data.magazineId);
         setActiveTab('magazine');
+      } else if (event.data.type === 'OPEN_VIDEO') {
+        setSelectedVideoId(event.data.videoId);
+        setActiveTab('videos');
       } else if (event.data.type === 'NAVIGATE_TO_ADMIN') {
         setActiveTab('admin');
         setTimeout(() => {
@@ -159,7 +151,7 @@ function App() {
       case 'webinars': 
         return <AuthGuard><WebinarsPage /></AuthGuard>;
       case 'videos': 
-        return <AuthGuard><VideosPage /></AuthGuard>;
+        return <AuthGuard><VideosPage videoId={selectedVideoId} /></AuthGuard>;
       case 'protected': 
         return <AuthGuard><ProtectedContentDemo /></AuthGuard>;
       case 'register': 

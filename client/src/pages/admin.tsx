@@ -581,9 +581,50 @@ function WebinarsManagerTab() {
 }
 
 function CoursesTab() {
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [createData, setCreateData] = useState({
+    title: '',
+    description: '',
+    thumbnailUrl: '',
+    category: '',
+    level: 'beginner',
+    accessLevel: 'free',
+    price: 0
+  });
+
   const { data: courses, isLoading } = useQuery<Course[]>({
     queryKey: ['/api/courses'],
   });
+
+  const createMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('/api/courses', { method: 'POST', body: JSON.stringify(data) }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/courses'] });
+      setShowCreateForm(false);
+      setCreateData({
+        title: '',
+        description: '',
+        thumbnailUrl: '',
+        category: '',
+        level: 'beginner',
+        accessLevel: 'free',
+        price: 0
+      });
+      alert('دوره با موفقیت ایجاد شد');
+    },
+    onError: (error) => {
+      console.error('Error creating course:', error);
+      alert('خطا در ایجاد دوره');
+    },
+  });
+
+  const handleCreateSubmit = () => {
+    if (!createData.title.trim()) {
+      alert('لطفاً عنوان دوره را وارد کنید');
+      return;
+    }
+    createMutation.mutate(createData);
+  };
 
   if (isLoading) {
     return (
@@ -598,18 +639,98 @@ function CoursesTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900">دوره‌ها</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <button 
+          onClick={() => setShowCreateForm(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
           <Plus className="h-4 w-4" />
           دوره جدید
         </button>
       </div>
+
+      {showCreateForm && (
+        <div className="bg-white rounded-lg border p-6">
+          <h3 className="text-lg font-semibold mb-4">افزودن دوره جدید</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">عنوان دوره</label>
+              <input
+                type="text"
+                value={createData.title}
+                onChange={(e) => setCreateData({...createData, title: e.target.value})}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="عنوان دوره"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">توضیحات</label>
+              <textarea
+                value={createData.description}
+                onChange={(e) => setCreateData({...createData, description: e.target.value})}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows={3}
+                placeholder="توضیحات دوره"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">دسته‌بندی</label>
+                <input
+                  type="text"
+                  value={createData.category}
+                  onChange={(e) => setCreateData({...createData, category: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="مثلا: کشاورزی"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">سطح</label>
+                <select
+                  value={createData.level}
+                  onChange={(e) => setCreateData({...createData, level: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="beginner">مبتدی</option>
+                  <option value="intermediate">متوسط</option>
+                  <option value="advanced">پیشرفته</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">آدرس تصویر</label>
+              <input
+                type="url"
+                value={createData.thumbnailUrl}
+                onChange={(e) => setCreateData({...createData, thumbnailUrl: e.target.value})}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="https://example.com/image.jpg"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleCreateSubmit}
+                disabled={createMutation.isPending}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                {createMutation.isPending ? 'در حال ایجاد...' : 'ایجاد دوره'}
+              </button>
+              <button
+                onClick={() => setShowCreateForm(false)}
+                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+              >
+                لغو
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-lg border">
         <div className="p-4 border-b">
           <h4 className="font-semibold">دوره‌های موجود</h4>
         </div>
         <div className="divide-y">
-          {courses && courses.map((course: Course) => (
+          {courses && courses.length > 0 ? courses.map((course: Course) => (
             <div key={course.id} className="p-4 flex items-center justify-between">
               <div>
                 <h5 className="font-medium">{course.title}</h5>
@@ -624,7 +745,11 @@ function CoursesTab() {
                 </button>
               </div>
             </div>
-          ))}
+          )) : (
+            <div className="p-8 text-center text-gray-500">
+              هنوز دوره‌ای اضافه نشده است.
+            </div>
+          )}
         </div>
       </div>
     </div>
