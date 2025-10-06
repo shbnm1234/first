@@ -165,12 +165,15 @@ function App() {
 
   return (
       <Router>
-        <Route path="/admin">
-          <AdminSimplePage />
+        <Route path="/admin*">
+          {() => {
+            const [location] = useLocation();
+            if (location === '/admin/posts') return <PostsPage />;
+            if (location === '/admin/articles') return <ArticlesPage />;
+            if (location === '/admin/appearance') return <AppearancePage />;
+            return <AdminSimplePage />;
+          }}
         </Route>
-        <Route path="/admin/posts" component={PostsPage} />
-          <Route path="/admin/articles" component={ArticlesPage} />
-          <Route path="/admin/appearance" component={AppearancePage} />
 
         <Route path="*">
           <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50" dir="rtl">

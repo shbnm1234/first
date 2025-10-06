@@ -6,7 +6,7 @@ import { Calendar, Edit, Eye, File, Folder, Image, Lock, LockOpen, MoreHorizonta
 import WorkshopsTab from "../components/admin/WorkshopsTab";
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState("aboutus");
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'courses' | 'posts' | 'articles' | 'workshops' | 'documents' | 'media' | 'settings' | 'projects' | 'magazines' | 'webinars' | 'about-us' | 'slider' | 'quick-access' | 'contact'>('dashboard');
 
   return (
     <div dir="rtl" className="min-h-screen bg-gray-50">
@@ -34,13 +34,14 @@ export default function AdminPage() {
                 { id: "media", label: "کتابخانه رسانه", icon: Upload },
                 { id: "aboutus", label: "درباره ما", icon: Building },
                 { id: "contactus", label: "تماس با ما", icon: Phone },
-                { id: "users", label: "کاربران", icon: Lock }
+                { id: "users", label: "کاربران", icon: Lock },
+                { id: "articles", label: "مقالات", icon: File }
               ].map(tab => {
                 const IconComponent = tab.icon;
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => setActiveTab(tab.id as any)}
                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-right transition-colors ${
                       activeTab === tab.id 
                         ? 'bg-blue-50 text-blue-700 font-medium' 
@@ -62,7 +63,9 @@ export default function AdminPage() {
             <h2 className="text-2xl font-bold text-gray-900">
               {activeTab === "courses" && "دوره‌های آموزشی"}
               {activeTab === "projects" && "پروژه‌ها"}
-              {activeTab === "documents" && "اسناد"}
+              {activeTab === "documents" && "آرشیو اسناد"}
+              {activeTab === "articles" && "مقالات"}
+              {activeTab === "workshop-registrations" && "ثبت‌نام‌های کارگاه"}
               {activeTab === "workshops" && "کارگاه‌های آموزشی"}
               {activeTab === "webinars" && "وبینارهای آموزشی"}
               {activeTab === "educational-videos" && "ویدیوهای آموزشی"}
@@ -80,6 +83,7 @@ export default function AdminPage() {
             {activeTab === "courses" && <CoursesTab />}
             {activeTab === "projects" && <ProjectsTab />}
               {activeTab === "documents" && <DocumentsTab />}
+            {activeTab === "articles" && <ArticlesTab />}
             {activeTab === "workshop-registrations" && <WorkshopRegistrationsTab />}
             {activeTab === "workshops" && <WorkshopsTab />}
             {activeTab === "webinars" && <WebinarsTab />}
@@ -342,6 +346,336 @@ function DocumentsTab() {
     </div>
   );
 }
+
+function ArticlesTab() {
+  const [showForm, setShowForm] = useState(false);
+  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+  const [formData, setFormData] = useState<ArticleContent>({
+    title: '',
+    slug: '',
+    content: '',
+    excerpt: '',
+    coverImageUrl: '',
+    tags: [],
+    author: '',
+    publishedAt: '',
+    isPublished: false
+  });
+
+  const queryClient = useQueryClient();
+
+  const { data: articles, isLoading } = useQuery<Article[]>({
+    queryKey: ['/api/articles'],
+    queryFn: () => fetch('/api/articles').then(res => res.json()),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async (articleData: ArticleContent) => {
+      return apiRequest('/api/articles', {
+        method: 'POST',
+        body: JSON.stringify(articleData),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/articles'] });
+      setShowForm(false);
+      resetForm();
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, ...articleData }: ArticleContent & { id: number }) => {
+      return apiRequest(`/api/articles/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(articleData),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/articles'] });
+      setShowForm(false);
+      setEditingArticle(null);
+      resetForm();
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest(`/api/articles/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/articles'] });
+    },
+  });
+
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      slug: '',
+      content: '',
+      excerpt: '',
+      coverImageUrl: '',
+      tags: [],
+      author: '',
+      publishedAt: '',
+      isPublished: false
+    });
+  };
+
+  const handleEdit = (article: Article) => {
+    setEditingArticle(article);
+    setFormData({
+      title: article.title,
+      slug: article.slug,
+      content: article.content,
+      excerpt: article.excerpt || '',
+      coverImageUrl: article.coverImageUrl || '',
+      tags: article.tags || [],
+      author: article.author || '',
+      publishedAt: article.publishedAt ? new Date(article.publishedAt).toISOString().split('T')[0] : '',
+      isPublished: article.isPublished ?? false
+    });
+    setShowForm(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingArticle) {
+      updateMutation.mutate({ id: editingArticle.id, ...formData });
+    } else {
+      createMutation.mutate(formData);
+    }
+  };
+
+  const handleDelete = (id: number) => {
+    if (confirm('آیا از حذف این مقاله اطمینان دارید؟')) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  if (isLoading) {
+    return <div className="text-center py-8">در حال بارگذاری...</div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-lg shadow-md">
+        <div className="p-6 border-b">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">مدیریت مقالات</h2>
+            <button 
+              onClick={() => {
+                setShowForm(!showForm);
+                setEditingArticle(null);
+                resetForm();
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              {showForm ? 'لغو' : 'افزودن مقاله جدید'}
+            </button>
+          </div>
+        </div>
+
+        {showForm && (
+          <div className="p-6 border-t bg-gray-50">
+            <h3 className="text-lg font-semibold mb-4">
+              {editingArticle ? 'ویرایش مقاله' : 'افزودن مقاله جدید'}
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    عنوان مقاله
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    اسلاگ (Slug)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.slug}
+                    onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="مثال: my-first-article"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  چکیده (Excerpt)
+                </label>
+                <textarea
+                  value={formData.excerpt}
+                  onChange={(e) => setFormData({...formData, excerpt: e.target.value})}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  محتوای مقاله
+                </label>
+                <textarea
+                  value={formData.content}
+                  onChange={(e) => setFormData({...formData, content: e.target.value})}
+                  rows={10}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    URL تصویر شاخص
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.coverImageUrl}
+                    onChange={(e) => setFormData({...formData, coverImageUrl: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="/uploads/article-cover.jpg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    برچسب‌ها (Comma separated)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.tags.join(', ')}
+                    onChange={(e) => setFormData({...formData, tags: e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="تکنولوژی، برنامه نویسی، ..."
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    نویسنده
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.author}
+                    onChange={(e) => setFormData({...formData, author: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="نام نویسنده"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    تاریخ انتشار
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.publishedAt}
+                    onChange={(e) => setFormData({...formData, publishedAt: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="flex items-center pt-6">
+                  <input
+                    type="checkbox"
+                    id="isPublished"
+                    checked={formData.isPublished}
+                    onChange={(e) => setFormData({...formData, isPublished: e.target.checked})}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label htmlFor="isPublished" className="mr-2 text-sm font-medium text-gray-700">
+                    منتشر شده باشد
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  disabled={createMutation.isPending || updateMutation.isPending}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {createMutation.isPending || updateMutation.isPending ? 'در حال ذخیره...' : 
+                   editingArticle ? 'بروزرسانی مقاله' : 'ایجاد مقاله'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingArticle(null);
+                    resetForm();
+                  }}
+                  className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+                >
+                  لغو
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        <div className="p-6">
+          {articles && articles.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عنوان</th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نویسنده</th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاریخ انتشار</th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت</th>
+                    <th scope="col" className="relative px-6 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {articles.map(article => (
+                    <tr key={article.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{article.title}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{article.author || 'نامشخص'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('fa-IR') : 'پیش‌نویس'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold leading-4 ${
+                          article.isPublished ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          {article.isPublished ? 'منتشر شده' : 'پیش‌نویس'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-2">
+                        <button onClick={() => handleEdit(article)} className="text-indigo-600 hover:text-indigo-900">
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => handleDelete(article.id)} className="text-red-600 hover:text-red-900">
+                          <Trash className="h-4 w-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <File className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">هیچ مقاله‌ای یافت نشد</h3>
+              <p className="text-gray-600">برای شروع، مقاله جدیدی اضافه کنید</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 function WorkshopRegistrationsTab() {
   const { data: registrations = [], isLoading } = useQuery<any[]>({ queryKey: ['/api/workshop-registrations'] });

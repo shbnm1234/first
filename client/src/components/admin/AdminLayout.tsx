@@ -24,7 +24,8 @@ import {
   User,
   Palette,
   Monitor,
-  Sliders
+  Sliders,
+  FileText as FileTextIcon
 } from "lucide-react";
 
 interface AdminLayoutProps {
@@ -62,7 +63,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     },
     {
       title: "مقالات",
-      icon: BookOpen,
+      icon: FileTextIcon,
       href: "/admin/articles",
       active: location.startsWith("/admin/articles")
     },
