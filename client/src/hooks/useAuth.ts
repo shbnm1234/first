@@ -22,6 +22,13 @@ export function useAuth() {
 
   const { data: user, isLoading, error, refetch } = useQuery<User>({
     queryKey: ['/api/auth/user'],
+    queryFn: async () => {
+      const response = await fetch('/api/auth/user');
+      if (!response.ok) {
+        throw new Error('Not authenticated');
+      }
+      return response.json();
+    },
     retry: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,

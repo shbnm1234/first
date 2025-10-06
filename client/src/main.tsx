@@ -11,6 +11,14 @@ const queryClient = new QueryClient({
       refetchOnMount: false,
       refetchOnReconnect: false,
       staleTime: 10 * 60 * 1000, // 10 minutes
+      queryFn: async ({ queryKey }) => {
+        const url = queryKey[0] as string;
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch ${url}`);
+        }
+        return response.json();
+      },
     },
   },
 });

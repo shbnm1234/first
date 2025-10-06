@@ -4,6 +4,13 @@ import { ArrowRight, Phone, Mail, MapPin, Clock } from 'lucide-react';
 export default function AboutUsPage() {
   const { data: aboutData, isLoading } = useQuery({
     queryKey: ['/api/about-us'],
+    queryFn: async () => {
+      const response = await fetch('/api/about-us');
+      if (!response.ok) {
+        throw new Error('Failed to fetch about us data');
+      }
+      return response.json();
+    },
   });
 
   if (isLoading) {
