@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Router, Route } from 'wouter';
@@ -26,6 +25,9 @@ import { AuthGuard } from './components/AuthGuard';
 import { useAuth } from './hooks/useAuth';
 import { SearchModal } from './components/SearchModal';
 import NotFoundPage from './pages/not-found';
+import PostsPage from "@/pages/admin/posts";
+import ArticlesPage from "@/pages/admin/articles";
+import AppearancePage from "@/pages/admin/appearance";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -177,7 +179,10 @@ function App() {
         <Route path="/admin">
           <AdminSimplePage />
         </Route>
-        
+        <Route path="/admin/posts" component={PostsPage} />
+          <Route path="/admin/articles" component={ArticlesPage} />
+          <Route path="/admin/appearance" component={AppearancePage} />
+
         <Route path="*">
           <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50" dir="rtl">
             {activeTab !== 'admin' && activeTab !== 'webinar' && activeTab !== 'magazine' && activeTab !== 'about-us' && activeTab !== 'contact-us' && <Header />}
