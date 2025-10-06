@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from '@/lib/queryClient';
 import { Router, Route } from 'wouter';
 import HomePage from './pages/home-simple';
 import CoursesPage from './pages/courses-simple';
@@ -166,7 +164,6 @@ function App() {
   };
 
   return (
-    <QueryClientProvider client={queryClient}>
       <Router>
         <Route path="/admin">
           <AdminSimplePage />
@@ -286,7 +283,6 @@ function App() {
           onClose={() => setShowSearchModal(false)} 
         />
       </Router>
-    </QueryClientProvider>
   );
 }
 

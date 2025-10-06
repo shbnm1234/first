@@ -139,6 +139,16 @@ Changelog:
   * Set up PostgreSQL database with proper migrations
   * Added "درباره ما" (About Us) navigation item to bottom menu after categories
   * All systems now running properly with secure client/server separation
+- October 6, 2025. Fixed React Query setup and added missing functionality:
+  * CRITICAL FIX: Consolidated multiple QueryClient instances into single shared instance
+  * Created centralized queryClient in lib/queryClient.ts with default queryFn
+  * QueryClientProvider now properly wraps entire app from main.tsx
+  * Fixed data loading issues across all pages (About Us, Contact Us, etc.)
+  * Added course creation functionality to admin panel with full form
+  * Implemented educational video playback with ReactPlayer modal
+  * Added OPEN_VIDEO message handler for video navigation
+  * All cache invalidation now works correctly for admin mutations
+  * Application stable with no console errors
 ```
 
 ## User Preferences
